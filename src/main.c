@@ -108,7 +108,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
     {
       case KEY_VIBRATE:
       // Trigger vibration 
-      text_layer_set_text(text_layer, "Vibrate Activated"); 
+      text_layer_set_text(clue_layer, "Vibrate Activated"); 
       vibes_short_pulse();
       break;
       
@@ -154,19 +154,19 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
 /********************************* Buttons ************************************/
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "o.o");
+  text_layer_set_text(clue_layer, "o.o");
 
   send(KEY_BUTTON, BUTTON_SELECT);
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "Up");
+  text_layer_set_text(clue_layer, "Up");
 
   send(KEY_BUTTON, BUTTON_UP);
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "Down");
+  text_layer_set_text(clue_layer, "Down");
 
   send(KEY_BUTTON, BUTTON_DOWN);
 }
@@ -293,7 +293,7 @@ static void window_load(Window *window) {
   text_layer_set_overflow_mode(eventName_layer, GTextOverflowModeWordWrap);
 
   progress_layer = text_layer_create((GRect) { .origin = { 0, 30 }, .size = { bounds.size.w, 20 } });
-  text_layer_set_font(progress_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_font(progress_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 //   text_layer_set_text(progress_layer, tempEvent.progress);
   text_layer_set_text(progress_layer, "Progress: 2 / 20");
   text_layer_set_text_alignment(progress_layer, GTextAlignmentCenter);
@@ -305,12 +305,16 @@ static void window_load(Window *window) {
   text_layer_set_text(rank_layer,"Ranking: 6 / 10"); 
   text_layer_set_text_alignment(rank_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(rank_layer, GTextOverflowModeWordWrap);
+
+  points_layer = text_layer_create((GRect) { .origin = { 0, 70 }, .size = { bounds.size.w, 30 } });
+  text_layer_set_font(points_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_text(points_layer, "2300 points");
+  text_layer_set_text_alignment(points_layer, GTextAlignmentCenter);
+  text_layer_set_overflow_mode(points_layer, GTextOverflowModeWordWrap);
   
-  clue_layer = text_layer_create((GRect) { .origin = { 0, 90 }, .size = { bounds.size.w, 50 } });
+  clue_layer = text_layer_create((GRect) { .origin = { 0, 100 }, .size = { bounds.size.w, 65 } });
   text_layer_set_font(clue_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-  text_layer_set_text(clue_layer, "Clue: [Where would you buy books?]");
-  text_layer_set_background_color(clue_layer, GColorBlack);
-  text_layer_set_text_color(clue_layer, GColorWhite); 
+  text_layer_set_text(clue_layer, "Clue: Where would you buy books?");
   text_layer_set_text_alignment(clue_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(clue_layer, GTextOverflowModeWordWrap);
 //   text_layer = text_layer_create((GRect) { .origin = { 0, 90 }, .size = { bounds.size.w, 50 } });
@@ -322,6 +326,7 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(progress_layer));
   layer_add_child(window_layer, text_layer_get_layer(eventName_layer));
   layer_add_child(window_layer, text_layer_get_layer(rank_layer));
+  layer_add_child(window_layer, text_layer_get_layer(points_layer)); 
   layer_add_child(window_layer, text_layer_get_layer(clue_layer));
 }
 

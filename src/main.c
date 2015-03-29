@@ -1,45 +1,67 @@
+/*** Includes that are required ***/ 
 #include <pebble.h>
 #include <time.h>
 #include <string.h>
 
+// Define the time for the splash screen 
 #define SPLASH_LOADING 1000
   
 enum 
 KEY { KEY_BUTTON, 
      KEY_VIBRATE, 
-     KEY_NAME, 
-     KEY_EMAIL,
-     KEY_PHONE
+     KEY_PLAYER_NAME,
+     KEY_EVENT_NAME,
+     KEY_RANK,
+     KEY_POINTS,
+     KEY_PROGRESS
     };
 
 #define BUTTON_UP  0
 #define BUTTON_SELECT  1
 #define BUTTON_DOWN  2
-#define MAX_PHONE 20
-#define MAX_NAME 60
-#define MAX_EMAIL 60
+// Define how big field information can be 
+#define MAX_EVENT_NAME 60
+#define MAX_PROGRESS 7
+#define MAX_PLAYER_NAME 20
 #define CONTACT_KEY 1
 
+// Create the windows that we need 
 static Window *window;
 static Window *s_splash_window;
+
+// Create the text layers that we need 
 static TextLayer *text_layer;
+
+// Create the text layers need for events
+static TextLayer *playerName_layer; 
+static TextLayer *eventName_layer; 
+static TextLayer *rank_layer; 
+static TextLayer *progress_layer; 
+
 static TextLayer *name_layer;
 static TextLayer *email_layer;
 static TextLayer *phone_layer;
+
 static BitmapLayer *s_splash_bitmap_layer; 
 AppTimer *timer; 
 
-// text layers 
+/****** Splash Screen ********/ 
+
+// Text layer for splash screen 
 static TextLayer *s_text_loading_layer;
 
-// bitmap 
+// Bitmap for Splash Screen 
 static GBitmap *s_splash_bitmap;
+/***************************/ 
 
+/*** Structure for storing events ****/ 
 typedef struct {
-  char  name[MAX_NAME];	       
-  char  email[MAX_EMAIL];	  
-  char  phone[MAX_PHONE]; 
-} personInfo;
+  char eventName[MAX_NAME]; 
+  char playerName[MAX_PLAYER_NAME];	       
+  int rank;
+  int points;
+  char progress_layer[MAX_PROGRESS]; 	  
+} eventInfo;
 
 /***** Handling App Messages *****/
 
@@ -56,7 +78,7 @@ static void send(int key, int message)
 
 static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
 {
-  personInfo temp; 
+  eventInfo temp; 
   // Get the first pair 
   Tuple *t = dict_read_first(iterator);
 
@@ -72,20 +94,26 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
       vibes_short_pulse();
       break;
       
-      case KEY_NAME:
-      strcpy(temp.name, t->value->cstring);
+      case KEY_PLAYER_NAME:
+      strcpy(temp.playerName, t->value->cstring);
       text_layer_set_text(name_layer, t->value->cstring); 
       break;
 
-      case KEY_EMAIL:
-      strcpy(temp.email, t->value->cstring);
+      case KEY_EVENT_NAME:
+      strcpy(temp.eventName, t->value->cstring);
       text_layer_set_text(email_layer, t->value->cstring); 
       break;
 
-      case KEY_PHONE:
-      strcpy(temp.phone, t->value->cstring);
-      text_layer_set_text(phone_layer, t->value->cstring); 
+      case KEY_RANK:
+      temp.rank = t->value->uint; 
       break;
+
+      case KEY_POINTS:
+      temp.points = t->value->uint; 
+      break;
+
+      case KEY_PROGRESS:
+      break; 
       
       default:
       APP_LOG(APP_LOG_LEVEL_INFO, "Unknown key: %d", (int)t->key); 
@@ -100,6 +128,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
   vibes_short_pulse(); 
   text_layer_set_text(text_layer, "Contact Recieved.");
 }
+
 /********************************* Buttons ************************************/
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -142,6 +171,7 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context)
 void timer_callback(void *data) {
   window_stack_pop(true);
 }
+
 /******************************* main_window **********************************/
 static void splash_window_load(Window *window){
   // Set a 1000 millisecond to load the splash screen
@@ -154,11 +184,12 @@ static void splash_window_load(Window *window){
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_splash_bitmap_layer));
   s_text_loading_layer = text_layer_create(GRect(5, 120, window_bounds.size.w - 5, 30));
   text_layer_set_font(s_text_loading_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-  text_layer_set_text(s_text_loading_layer, "Establishing Link . . .");
+  text_layer_set_text(s_text_loading_layer, "Linking To Challenges . . .");
   text_layer_set_text_alignment(s_text_loading_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(s_text_loading_layer, GTextOverflowModeWordWrap);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_loading_layer));  
 }
+
 /**
  * This unloads all the layers after splash screen closes. 
  * @param Window: The window of the splash screen
@@ -170,39 +201,39 @@ static void splash_window_unload(Window *window){
 }
 
 static void window_load(Window *window) {
-  personInfo tempPerson; 
-  strcpy(tempPerson.name, ""); 
-  strcpy(tempPerson.email, ""); 
-  strcpy(tempPerson.phone, ""); 
+  eventInfo tempEvent; 
+  strcpy(tempPerson.playerName, ""); 
+  strcpy(tempPerson.eventName, ""); 
+  strcpy(tempPerson.rank, ""); 
   
   if (persist_exists(CONTACT_KEY))
   {
     printf("Time to read some previous data"); 
     persist_read_data(CONTACT_KEY, &tempPerson, sizeof(tempPerson));
-    text_layer_set_text(name_layer, tempPerson.name); 
-    text_layer_set_text(email_layer, tempPerson.email); 
-    text_layer_set_text(phone_layer, tempPerson.phone); 
+    text_layer_set_text(name_layer, tempPerson.playerName); 
+    text_layer_set_text(email_layer, tempPerson.eventName); 
+    text_layer_set_text(phone_layer, tempPerson.rank); 
   }
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
   name_layer = text_layer_create((GRect) { .origin = { 0, 20 }, .size = { bounds.size.w, 30 } });
   text_layer_set_font(name_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 //   text_layer_set_text(name_layer, "Name: Albert Tai");
-  text_layer_set_text(name_layer, tempPerson.name);
+  text_layer_set_text(name_layer, tempPerson.playerName);
   text_layer_set_text_alignment(name_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(name_layer, GTextOverflowModeWordWrap);
 
   email_layer = text_layer_create((GRect) { .origin = { 0, 50 }, .size = { bounds.size.w, 20 } });
   text_layer_set_font(email_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
 //   text_layer_set_text(email_layer, "Email: al@alberttai.com");
-  text_layer_set_text(email_layer, tempPerson.email);
+  text_layer_set_text(email_layer, tempPerson.eventName);
   text_layer_set_text_alignment(email_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(email_layer, GTextOverflowModeWordWrap);
 
   phone_layer = text_layer_create((GRect) { .origin = { 0, 70 }, .size = { bounds.size.w, 20 } });
   text_layer_set_font(phone_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
 //   text_layer_set_text(phone_layer, "Phone: 226-239-5218");
-  text_layer_set_text(phone_layer, tempPerson.phone);
+  text_layer_set_text(phone_layer, tempPerson.rank);
   text_layer_set_text_alignment(phone_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(phone_layer, GTextOverflowModeWordWrap);
   
@@ -233,28 +264,34 @@ static void init(void) {
 
   window = window_create();
   s_splash_window = window_create();
+
   // Set the click configuration 
   window_set_click_config_provider(window, click_config_provider);
+
   // This sets up the main screen 
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
   });
+
   // This creates the splash screen 
   window_set_window_handlers(s_splash_window, (WindowHandlers) {
     .load = splash_window_load,
     .unload = splash_window_unload,
   });
+
   const bool animated = true;
   window_stack_push(window, animated);
   window_stack_push(s_splash_window, animated);
 }
+
 // Deinitalizing the windows 
 static void deinit(void) {
   window_destroy(window);
   window_destroy(s_splash_window);
 }
 
+// Main function 
 int main(void) {
   init();
 

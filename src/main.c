@@ -4,7 +4,7 @@
 #include <string.h>
 
 // Define the time for the splash screen 
-#define SPLASH_LOADING 1000
+#define SPLASH_LOADING 1500
   
 enum 
 KEY { KEY_BUTTON, 
@@ -21,7 +21,7 @@ KEY { KEY_BUTTON,
 #define BUTTON_DOWN  2
 // Define how big field information can be 
 #define MAX_EVENT_NAME 60
-#define MAX_PROGRESS 7
+#define MAX_PROGRESS 25
 #define MAX_PLAYER_NAME 20
 #define MAX_RANK 20
 #define MAX_POINTS 20 
@@ -31,6 +31,8 @@ KEY { KEY_BUTTON,
 // Create the windows that we need 
 static Window *window;
 static Window *s_splash_window;
+static Window *requireChallengeWindow; 
+static Window *challengeAcceptedWindow; 
 
 // Create the text layers that we need 
 static TextLayer *text_layer;
@@ -42,6 +44,19 @@ static TextLayer *rank_layer;
 static TextLayer *progress_layer; 
 
 static BitmapLayer *s_splash_bitmap_layer; 
+
+// Create text layers needed for require challenge window
+
+static BitmapLayer *challenge_bitmap_layer; 
+static GBitmap *challenge_bitmap; 
+static TextLayer *warning_msg_layer; 
+
+// Create text layers needed for challenge accept window
+
+static BitmapLayer *accept_bitmap_layer; 
+static GBitmap *accept_bitmap; 
+static TextLayer *accept_msg_layer; 
+
 AppTimer *timer; 
 
 /****** Splash Screen ********/ 
@@ -59,8 +74,10 @@ typedef struct {
   char playerName[MAX_PLAYER_NAME];	       
   char rank[MAX_RANK];
   char points[MAX_POINTS];
-  char progress_layer[MAX_PROGRESS]; 	  
+  char progress[MAX_PROGRESS]; 	  
 } eventInfo;
+
+/***** Flags *****/
 
 /***** Handling App Messages *****/
 
@@ -178,12 +195,12 @@ static void splash_window_load(Window *window){
   Layer *window_layer = window_get_root_layer(window); 
   GRect window_bounds = layer_get_bounds(window_layer);
   s_splash_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_SPLASH);
-  s_splash_bitmap_layer = bitmap_layer_create(GRect(5, 5, 130, 130));
+  s_splash_bitmap_layer = bitmap_layer_create(GRect(12, 12, 120, 120));
   bitmap_layer_set_bitmap(s_splash_bitmap_layer, s_splash_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_splash_bitmap_layer));
-  s_text_loading_layer = text_layer_create(GRect(5, 130, window_bounds.size.w - 5, 30));
-  text_layer_set_font(s_text_loading_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-  text_layer_set_text(s_text_loading_layer, "Linking To Challenges . . .");
+  s_text_loading_layer = text_layer_create(GRect(5, 123, window_bounds.size.w - 5, 30));
+  text_layer_set_font(s_text_loading_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+  text_layer_set_text(s_text_loading_layer, "Challenge Link");
   text_layer_set_text_alignment(s_text_loading_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(s_text_loading_layer, GTextOverflowModeWordWrap);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_loading_layer));  
@@ -198,12 +215,57 @@ static void splash_window_unload(Window *window){
   gbitmap_destroy(s_splash_bitmap);
   bitmap_layer_destroy(s_splash_bitmap_layer);
 }
-
+static void challengeAcceptedWindow_load(Window *window){
+  Layer *window_layer = window_get_root_layer(window); 
+  GRect window_bounds = layer_get_bounds(window_layer);
+  accept_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_CHALLENGEJOINED);
+  accept_bitmap_layer = bitmap_layer_create(GRect(15, 15, 110, 110));
+  bitmap_layer_set_bitmap(accept_bitmap_layer, accept_bitmap);
+  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(accept_bitmap_layer));
+  accept_msg_layer = text_layer_create(GRect(5, 110, window_bounds.size.w - 5, 40));
+  text_layer_set_font(accept_msg_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  text_layer_set_text(accept_msg_layer, "Challenge Name Joined");
+  text_layer_set_text_alignment(accept_msg_layer, GTextAlignmentCenter);
+  text_layer_set_overflow_mode(accept_msg_layer, GTextOverflowModeWordWrap);
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(accept_msg_layer));  
+}
+/**
+ * This unloads all the layers after splash screen closes. 
+ * @param Window: The window of the splash screen
+ */
+static void challengeAcceptedWindow_unload(Window *window){
+  text_layer_destroy(accept_msg_layer);
+  gbitmap_destroy(accept_bitmap);
+  bitmap_layer_destroy(accept_bitmap_layer);
+}
+static void requireChallenge_load(Window *window){
+  Layer *window_layer = window_get_root_layer(window); 
+  GRect window_bounds = layer_get_bounds(window_layer);
+  challenge_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_WARNING);
+  challenge_bitmap_layer = bitmap_layer_create(GRect(10, 10, 120, 120));
+  bitmap_layer_set_bitmap(challenge_bitmap_layer, challenge_bitmap);
+  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(challenge_bitmap_layer));
+  warning_msg_layer = text_layer_create(GRect(5, 120, window_bounds.size.w - 5, 30));
+  text_layer_set_font(warning_msg_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+  text_layer_set_text(warning_msg_layer, "Join A Room.");
+  text_layer_set_text_alignment(warning_msg_layer, GTextAlignmentCenter);
+  text_layer_set_overflow_mode(warning_msg_layer, GTextOverflowModeWordWrap);
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(warning_msg_layer));  
+}
+/**
+ * This unloads all the layers after splash screen closes. 
+ * @param Window: The window of the splash screen
+ */
+static void requireChallenge_unload(Window *window){
+  text_layer_destroy(warning_msg_layer);
+  gbitmap_destroy(challenge_bitmap);
+  bitmap_layer_destroy(challenge_bitmap_layer);
+}
 static void window_load(Window *window) {
   eventInfo tempEvent; 
-  strcpy(tempEvent.playerName, ""); 
-  strcpy(tempEvent.eventName, ""); 
-  strcpy(tempEvent.rank, "");  
+  strcpy(tempEvent.eventName, "Learn Western Campus"); 
+  strcpy(tempEvent.progress, "Completed 2/20");
+  strcpy(tempEvent.rank, "6th / 10");  
   
 //   if (persist_exists(CONTACT_KEY))
 //   {
@@ -215,19 +277,19 @@ static void window_load(Window *window) {
 //   }
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
-  playerName_layer = text_layer_create((GRect) { .origin = { 0, 20 }, .size = { bounds.size.w, 30 } });
-  text_layer_set_font(playerName_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  eventName_layer = text_layer_create((GRect) { .origin = { 0, 20 }, .size = { bounds.size.w, 30 } });
+  text_layer_set_font(eventName_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 //   text_layer_set_text(name_layer, "Name: Albert Tai");
-  text_layer_set_text(playerName_layer, tempEvent.playerName);
-  text_layer_set_text_alignment(playerName_layer, GTextAlignmentCenter);
-  text_layer_set_overflow_mode(playerName_layer, GTextOverflowModeWordWrap);
-
-  eventName_layer = text_layer_create((GRect) { .origin = { 0, 50 }, .size = { bounds.size.w, 20 } });
-  text_layer_set_font(eventName_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-//   text_layer_set_text(email_layer, "Email: al@alberttai.com");
   text_layer_set_text(eventName_layer, tempEvent.eventName);
   text_layer_set_text_alignment(eventName_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(eventName_layer, GTextOverflowModeWordWrap);
+
+  progress_layer = text_layer_create((GRect) { .origin = { 0, 50 }, .size = { bounds.size.w, 20 } });
+  text_layer_set_font(progress_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+//   text_layer_set_text(email_layer, "Email: al@alberttai.com");
+  text_layer_set_text(progress_layer, tempEvent.progress);
+  text_layer_set_text_alignment(progress_layer, GTextAlignmentCenter);
+  text_layer_set_overflow_mode(progress_layer, GTextOverflowModeWordWrap);
 
   rank_layer = text_layer_create((GRect) { .origin = { 0, 70 }, .size = { bounds.size.w, 20 } });
   text_layer_set_font(rank_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
@@ -242,7 +304,7 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(text_layer, GTextOverflowModeWordWrap);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
-  layer_add_child(window_layer, text_layer_get_layer(playerName_layer));
+  layer_add_child(window_layer, text_layer_get_layer(progress_layer));
   layer_add_child(window_layer, text_layer_get_layer(eventName_layer));
   layer_add_child(window_layer, text_layer_get_layer(rank_layer));
 }
@@ -250,7 +312,7 @@ static void window_load(Window *window) {
 static void window_unload(Window *window) {
   text_layer_destroy(text_layer);
   text_layer_destroy(playerName_layer); 
-  text_layer_destroy(eventName_layer); 
+  text_layer_destroy(progress_layer); 
   text_layer_destroy(rank_layer); 
 }
 
@@ -266,6 +328,8 @@ static void init(void) {
 
   window = window_create();
   s_splash_window = window_create();
+  requireChallengeWindow = window_create(); 
+  challengeAcceptedWindow = window_create(); 
 
   // Set the click configuration 
   window_set_click_config_provider(window, click_config_provider);
@@ -275,6 +339,14 @@ static void init(void) {
     .load = window_load,
     .unload = window_unload,
   });
+  window_set_window_handlers(requireChallengeWindow, (WindowHandlers) {
+    .load = requireChallenge_load, 
+    .unload = requireChallenge_unload, 
+  });
+  window_set_window_handlers(challengeAcceptedWindow, (WindowHandlers){
+    .load = challengeAcceptedWindow_load,
+    .unload = challengeAcceptedWindow_unload, 
+  });
 
   // This creates the splash screen 
   window_set_window_handlers(s_splash_window, (WindowHandlers) {
@@ -283,12 +355,16 @@ static void init(void) {
   });
 
   const bool animated = true;
-  window_stack_push(window, animated);
+  window_stack_push(requireChallengeWindow, animated); 
+  window_stack_push(challengeAcceptedWindow, animated); 
+  window_stack_push(window, animated); 
   window_stack_push(s_splash_window, animated);
 }
 
 // Deinitalizing the windows 
 static void deinit(void) {
+  window_destroy(challengeAcceptedWindow); 
+  window_destroy(requireChallengeWindow);
   window_destroy(window);
   window_destroy(s_splash_window);
 }

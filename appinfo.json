@@ -9,6 +9,16 @@
     "resources": {
         "media": [
             {
+                "file": "images/position5.png",
+                "name": "IMAGE_CHALLENGEJOINED",
+                "type": "png"
+            },
+            {
+                "file": "images/warning42.png",
+                "name": "IMAGE_WARNING",
+                "type": "png"
+            },
+            {
                 "file": "images/pebble-splash.png",
                 "name": "IMAGE_SPLASH",
                 "type": "png"

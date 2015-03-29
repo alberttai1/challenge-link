@@ -5,7 +5,8 @@
 
 // Define the time for the splash screen 
 #define SPLASH_LOADING 1500
-#define LOC_COM_LOADING 10000 
+#define LOC_COM_LOADING 2000 
+#define CHALLENGE_ACCEPT 2000
   
 enum 
 KEY { KEY_BUTTON, 
@@ -15,7 +16,8 @@ KEY { KEY_BUTTON,
      KEY_RANK,
      KEY_POINTS,
      KEY_PROGRESS,
-     KEY_CLUE
+     KEY_CLUE,
+     KEY_UPDATELOC
     };
 
 #define BUTTON_UP  0
@@ -130,7 +132,9 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
       case KEY_EVENT_NAME:
       if (window_is_loaded(requireChallengeWindow))
       {
-        window_stack_pop(true);
+        window_destroy(requireChallengeWindow);
+        window_stack_push(window, 1); 
+        window_stack_push(challengeAcceptedWindow, 1); 
       }
       strcpy(temp.eventName, t->value->cstring);
       text_layer_set_text(eventName_layer, t->value->cstring); 
@@ -155,6 +159,11 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
       strcpy(temp.clue, t->value->cstring);
       text_layer_set_text(clue_layer, t->value->cstring); 
       break; 
+      
+      case KEY_UPDATELOC:
+      window_stack_push(locationCompletedWindow, 1); 
+      text_layer_set_text(loc_msg_layer, t->value->cstring); 
+      break;       
       
       default:
       APP_LOG(APP_LOG_LEVEL_INFO, "Unknown key: %d", (int)t->key); 
@@ -266,9 +275,7 @@ static void locationCompleted_unload(Window *window){
   bitmap_layer_destroy(loccompleted_bitmap_layer);
 }
 static void challengeAcceptedWindow_load(Window *window){
-  char event[1000]; 
-  strcat(event, temp.eventName); 
-  strcat(event, " Joined!"); 
+  app_timer_register(CHALLENGE_ACCEPT, (AppTimerCallback) timer_callback, NULL);
   Layer *window_layer = window_get_root_layer(window); 
   GRect window_bounds = layer_get_bounds(window_layer);
   accept_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_CHALLENGEJOINED);
@@ -428,9 +435,6 @@ static void init(void) {
   });
 
   const bool animated = true;
-  window_stack_push(locationCompletedWindow, animated); 
-  window_stack_push(window, animated); 
-  window_stack_push(challengeAcceptedWindow, animated); 
   window_stack_push(requireChallengeWindow, animated); 
   window_stack_push(s_splash_window, animated);
 }
@@ -438,7 +442,6 @@ static void init(void) {
 // Deinitalizing the windows 
 static void deinit(void) {
   window_destroy(challengeAcceptedWindow); 
-  window_destroy(requireChallengeWindow);
   window_destroy(window);
   window_destroy(s_splash_window);
 }

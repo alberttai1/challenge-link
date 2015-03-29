@@ -5,6 +5,7 @@
 
 // Define the time for the splash screen 
 #define SPLASH_LOADING 1500
+#define LOC_COM_LOADING 10000 
   
 enum 
 KEY { KEY_BUTTON, 
@@ -228,6 +229,8 @@ static void splash_window_unload(Window *window){
   bitmap_layer_destroy(s_splash_bitmap_layer);
 }
 static void locationCompleted_load(Window *window){
+  // Set a 1000 millisecond to load the splash screen
+  app_timer_register(LOC_COM_LOADING, (AppTimerCallback) timer_callback, NULL);
   Layer *window_layer = window_get_root_layer(window); 
   GRect window_bounds = layer_get_bounds(window_layer);
   loccompleted_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_CONGRATS);

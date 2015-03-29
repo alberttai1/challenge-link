@@ -162,7 +162,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
       
       case KEY_UPDATELOC:
       window_stack_push(locationCompletedWindow, 1); 
-      text_layer_set_text(loc_msg_layer, t->value->cstring); 
+      text_layer_set_text(loc_msg_layer, t->value->cstring);
       break;       
       
       default:
@@ -172,7 +172,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
     // Get next pair, if any
     t = dict_read_next(iterator);
   }
-  persist_write_data(CONTACT_KEY, &temp, sizeof(temp));
+//   persist_write_data(CONTACT_KEY, &temp, sizeof(temp));
 //   printf("The name is %s\n", temp.playerName); 
 //   printf("%d", persist_exists(CONTACT_KEY)); 
 //   vibes_short_pulse(); 
@@ -360,23 +360,18 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(rank_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(rank_layer, GTextOverflowModeWordWrap);
 
-  points_layer = text_layer_create((GRect) { .origin = { 0, 70 }, .size = { bounds.size.w, 30 } });
+  points_layer = text_layer_create((GRect) { .origin = { 0, 70 }, .size = { bounds.size.w, 24 } });
   text_layer_set_font(points_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_text(points_layer, "2300 points");
   text_layer_set_text_alignment(points_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(points_layer, GTextOverflowModeWordWrap);
   
-  clue_layer = text_layer_create((GRect) { .origin = { 0, 100 }, .size = { bounds.size.w, 65 } });
-  text_layer_set_font(clue_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  clue_layer = text_layer_create((GRect) { .origin = { 0, 95 }, .size = { bounds.size.w, 65 } });
+  text_layer_set_font(clue_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_text(clue_layer, "Clue: Where would you buy books?");
   text_layer_set_text_alignment(clue_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(clue_layer, GTextOverflowModeWordWrap);
-//   text_layer = text_layer_create((GRect) { .origin = { 0, 90 }, .size = { bounds.size.w, 50 } });
-//   text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-//   text_layer_set_text(text_layer, "Press Select Button to Send");
-//   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
-//   text_layer_set_overflow_mode(text_layer, GTextOverflowModeWordWrap);
-//   layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  
   layer_add_child(window_layer, text_layer_get_layer(progress_layer));
   layer_add_child(window_layer, text_layer_get_layer(eventName_layer));
   layer_add_child(window_layer, text_layer_get_layer(rank_layer));
@@ -441,6 +436,7 @@ static void init(void) {
 
 // Deinitalizing the windows 
 static void deinit(void) {
+  window_destroy(locationCompletedWindow); 
   window_destroy(challengeAcceptedWindow); 
   window_destroy(window);
   window_destroy(s_splash_window);

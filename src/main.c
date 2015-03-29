@@ -33,6 +33,7 @@ static Window *window;
 static Window *s_splash_window;
 static Window *requireChallengeWindow; 
 static Window *challengeAcceptedWindow; 
+static Window *locationCompletedWindow; 
 
 // Create the text layers that we need 
 static TextLayer *text_layer;
@@ -58,6 +59,11 @@ static TextLayer *warning_msg_layer;
 static BitmapLayer *accept_bitmap_layer; 
 static GBitmap *accept_bitmap; 
 static TextLayer *accept_msg_layer; 
+
+// Create text layers needed for challenge completed window
+static BitmapLayer *loccompleted_bitmap_layer; 
+static GBitmap *loccompleted_bitmap; 
+static TextLayer *loc_msg_layer;
 
 AppTimer *timer; 
 
@@ -221,6 +227,29 @@ static void splash_window_unload(Window *window){
   gbitmap_destroy(s_splash_bitmap);
   bitmap_layer_destroy(s_splash_bitmap_layer);
 }
+static void locationCompleted_load(Window *window){
+  Layer *window_layer = window_get_root_layer(window); 
+  GRect window_bounds = layer_get_bounds(window_layer);
+  loccompleted_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_CONGRATS);
+  loccompleted_bitmap_layer = bitmap_layer_create(GRect(15, 15, 110, 110));
+  bitmap_layer_set_bitmap(loccompleted_bitmap_layer, loccompleted_bitmap);
+  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(loccompleted_bitmap_layer));
+  loc_msg_layer = text_layer_create(GRect(5, 120, window_bounds.size.w - 5, 40));
+  text_layer_set_font(loc_msg_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  text_layer_set_text(loc_msg_layer, "Location 6 is Done.");
+  text_layer_set_text_alignment(loc_msg_layer, GTextAlignmentCenter);
+  text_layer_set_overflow_mode(loc_msg_layer, GTextOverflowModeWordWrap);
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(loc_msg_layer));  
+}
+/**
+ * This unloads all the layers after splash screen closes. 
+ * @param Window: The window of the splash screen
+ */
+static void locationCompleted_unload(Window *window){
+  text_layer_destroy(loc_msg_layer);
+  gbitmap_destroy(loccompleted_bitmap);
+  bitmap_layer_destroy(loccompleted_bitmap_layer);
+}
 static void challengeAcceptedWindow_load(Window *window){
   Layer *window_layer = window_get_root_layer(window); 
   GRect window_bounds = layer_get_bounds(window_layer);
@@ -351,6 +380,7 @@ static void init(void) {
   s_splash_window = window_create();
   requireChallengeWindow = window_create(); 
   challengeAcceptedWindow = window_create(); 
+  locationCompletedWindow = window_create(); 
 
   // Set the click configuration 
   window_set_click_config_provider(window, click_config_provider);
@@ -368,6 +398,10 @@ static void init(void) {
     .load = challengeAcceptedWindow_load,
     .unload = challengeAcceptedWindow_unload, 
   });
+  window_set_window_handlers(locationCompletedWindow, (WindowHandlers){
+    .load = locationCompleted_load,
+    .unload = locationCompleted_unload, 
+  });
 
   // This creates the splash screen 
   window_set_window_handlers(s_splash_window, (WindowHandlers) {
@@ -379,6 +413,7 @@ static void init(void) {
   window_stack_push(requireChallengeWindow, animated); 
   window_stack_push(challengeAcceptedWindow, animated); 
   window_stack_push(window, animated); 
+  window_stack_push(locationCompletedWindow, animated); 
   window_stack_push(s_splash_window, animated);
 }
 

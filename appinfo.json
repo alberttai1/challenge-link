@@ -9,6 +9,11 @@
     "resources": {
         "media": [
             {
+                "file": "images/13804.png",
+                "name": "IMAGE_CONGRATS",
+                "type": "png"
+            },
+            {
                 "file": "images/position5.png",
                 "name": "IMAGE_CHALLENGEJOINED",
                 "type": "png"

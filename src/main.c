@@ -14,7 +14,8 @@ KEY { KEY_BUTTON,
      KEY_EVENT_NAME,
      KEY_RANK,
      KEY_POINTS,
-     KEY_PROGRESS
+     KEY_PROGRESS,
+     KEY_CLUE
     };
 
 #define BUTTON_UP  0
@@ -26,6 +27,7 @@ KEY { KEY_BUTTON,
 #define MAX_PLAYER_NAME 20
 #define MAX_RANK 20
 #define MAX_POINTS 20 
+#define MAX_CLUE 50
   
 #define CONTACT_KEY 1
 
@@ -83,10 +85,12 @@ typedef struct {
   char playerName[MAX_PLAYER_NAME];	       
   char rank[MAX_RANK];
   char points[MAX_POINTS];
-  char progress[MAX_PROGRESS]; 	  
+  char progress[MAX_PROGRESS]; 	
+  char clue[MAX_CLUE];
 } eventInfo;
 
 /***** Flags *****/
+eventInfo temp; 
 
 /***** Handling App Messages *****/
 
@@ -103,7 +107,6 @@ static void send(int key, int message)
 
 static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
 {
-  eventInfo temp; 
   // Get the first pair 
   Tuple *t = dict_read_first(iterator);
 
@@ -125,6 +128,10 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
       break;
 
       case KEY_EVENT_NAME:
+      if (window_is_loaded(requireChallengeWindow))
+      {
+        window_stack_pop(true);
+      }
       strcpy(temp.eventName, t->value->cstring);
       text_layer_set_text(eventName_layer, t->value->cstring); 
       break;
@@ -142,6 +149,11 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
       case KEY_PROGRESS:
       strcpy(temp.progress, t->value->cstring);
       text_layer_set_text(progress_layer, t->value->cstring);
+      break; 
+      
+      case KEY_CLUE:
+      strcpy(temp.clue, t->value->cstring);
+      text_layer_set_text(clue_layer, t->value->cstring); 
       break; 
       
       default:
@@ -254,6 +266,9 @@ static void locationCompleted_unload(Window *window){
   bitmap_layer_destroy(loccompleted_bitmap_layer);
 }
 static void challengeAcceptedWindow_load(Window *window){
+  char event[1000]; 
+  strcat(event, temp.eventName); 
+  strcat(event, " Joined!"); 
   Layer *window_layer = window_get_root_layer(window); 
   GRect window_bounds = layer_get_bounds(window_layer);
   accept_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_CHALLENGEJOINED);
@@ -262,7 +277,7 @@ static void challengeAcceptedWindow_load(Window *window){
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(accept_bitmap_layer));
   accept_msg_layer = text_layer_create(GRect(5, 110, window_bounds.size.w - 5, 40));
   text_layer_set_font(accept_msg_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-  text_layer_set_text(accept_msg_layer, "Challenge Name Joined");
+  text_layer_set_text(accept_msg_layer, temp.eventName);
   text_layer_set_text_alignment(accept_msg_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(accept_msg_layer, GTextOverflowModeWordWrap);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(accept_msg_layer));  
@@ -413,10 +428,10 @@ static void init(void) {
   });
 
   const bool animated = true;
-  window_stack_push(requireChallengeWindow, animated); 
-  window_stack_push(challengeAcceptedWindow, animated); 
-  window_stack_push(window, animated); 
   window_stack_push(locationCompletedWindow, animated); 
+  window_stack_push(window, animated); 
+  window_stack_push(challengeAcceptedWindow, animated); 
+  window_stack_push(requireChallengeWindow, animated); 
   window_stack_push(s_splash_window, animated);
 }
 

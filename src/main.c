@@ -43,6 +43,7 @@ static TextLayer *eventName_layer;
 static TextLayer *rank_layer; 
 static TextLayer *progress_layer; 
 static TextLayer *points_layer; 
+static TextLayer *clue_layer; 
 
 static BitmapLayer *s_splash_bitmap_layer; 
 
@@ -153,7 +154,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
 /********************************* Buttons ************************************/
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, " ");
+  text_layer_set_text(text_layer, "o.o");
 
   send(KEY_BUTTON, BUTTON_SELECT);
 }
@@ -282,36 +283,46 @@ static void window_load(Window *window) {
 //   }
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
-  eventName_layer = text_layer_create((GRect) { .origin = { 0, 20 }, .size = { bounds.size.w, 30 } });
-  text_layer_set_font(eventName_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-  text_layer_set_text(eventName_layer, tempEvent.eventName);
-//   text_layer_set_text(eventName_layer, "Learn Western Campus");
+  eventName_layer = text_layer_create((GRect) { .origin = { 0, 0 }, .size = { bounds.size.w, 30 } });
+  text_layer_set_font(eventName_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+//   text_layer_set_text(eventName_layer, tempEvent.eventName);
+  text_layer_set_text(eventName_layer, "UWO Scavanger");
   text_layer_set_text_alignment(eventName_layer, GTextAlignmentCenter);
+  text_layer_set_background_color(eventName_layer, GColorBlack);
+  text_layer_set_text_color(eventName_layer, GColorWhite); 
   text_layer_set_overflow_mode(eventName_layer, GTextOverflowModeWordWrap);
 
-  progress_layer = text_layer_create((GRect) { .origin = { 0, 50 }, .size = { bounds.size.w, 20 } });
+  progress_layer = text_layer_create((GRect) { .origin = { 0, 30 }, .size = { bounds.size.w, 20 } });
   text_layer_set_font(progress_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-//   text_layer_set_text(email_layer, "Email: al@alberttai.com");
-  text_layer_set_text(progress_layer, tempEvent.progress);
+//   text_layer_set_text(progress_layer, tempEvent.progress);
+  text_layer_set_text(progress_layer, "Progress: 2 / 20");
   text_layer_set_text_alignment(progress_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(progress_layer, GTextOverflowModeWordWrap);
 
-  rank_layer = text_layer_create((GRect) { .origin = { 0, 70 }, .size = { bounds.size.w, 20 } });
-  text_layer_set_font(rank_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-//   text_layer_set_text(phone_layer, "Phone: 226-239-5218");
-  text_layer_set_text(rank_layer, tempEvent.rank);
+  rank_layer = text_layer_create((GRect) { .origin = { 0, 50 }, .size = { bounds.size.w, 20 } });
+  text_layer_set_font(rank_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+//   text_layer_set_text(rank_layer, tempEvent.rank);
+  text_layer_set_text(rank_layer,"Ranking: 6 / 10"); 
   text_layer_set_text_alignment(rank_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(rank_layer, GTextOverflowModeWordWrap);
   
-  text_layer = text_layer_create((GRect) { .origin = { 0, 90 }, .size = { bounds.size.w, 50 } });
-  text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-  text_layer_set_text(text_layer, "Press Select Button to Send");
-  text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
-  text_layer_set_overflow_mode(text_layer, GTextOverflowModeWordWrap);
-  layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  clue_layer = text_layer_create((GRect) { .origin = { 0, 90 }, .size = { bounds.size.w, 50 } });
+  text_layer_set_font(clue_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_text(clue_layer, "Clue: [Where would you buy books?]");
+  text_layer_set_background_color(clue_layer, GColorBlack);
+  text_layer_set_text_color(clue_layer, GColorWhite); 
+  text_layer_set_text_alignment(clue_layer, GTextAlignmentCenter);
+  text_layer_set_overflow_mode(clue_layer, GTextOverflowModeWordWrap);
+//   text_layer = text_layer_create((GRect) { .origin = { 0, 90 }, .size = { bounds.size.w, 50 } });
+//   text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+//   text_layer_set_text(text_layer, "Press Select Button to Send");
+//   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
+//   text_layer_set_overflow_mode(text_layer, GTextOverflowModeWordWrap);
+//   layer_add_child(window_layer, text_layer_get_layer(text_layer));
   layer_add_child(window_layer, text_layer_get_layer(progress_layer));
   layer_add_child(window_layer, text_layer_get_layer(eventName_layer));
   layer_add_child(window_layer, text_layer_get_layer(rank_layer));
+  layer_add_child(window_layer, text_layer_get_layer(clue_layer));
 }
 
 static void window_unload(Window *window) {

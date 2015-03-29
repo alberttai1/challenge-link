@@ -42,6 +42,7 @@ static TextLayer *playerName_layer;
 static TextLayer *eventName_layer; 
 static TextLayer *rank_layer; 
 static TextLayer *progress_layer; 
+static TextLayer *points_layer; 
 
 static BitmapLayer *s_splash_bitmap_layer; 
 
@@ -122,13 +123,17 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
 
       case KEY_RANK:
       strcpy(temp.rank, t->value->cstring);
+      text_layer_set_text(rank_layer, t->value->cstring);
       break;
 
       case KEY_POINTS:
       strcpy(temp.points, t->value->cstring);
+      text_layer_set_text(points_layer, t->value->cstring);
       break;
 
       case KEY_PROGRESS:
+      strcpy(temp.progress, t->value->cstring);
+      text_layer_set_text(progress_layer, t->value->cstring);
       break; 
       
       default:
@@ -262,9 +267,9 @@ static void requireChallenge_unload(Window *window){
   bitmap_layer_destroy(challenge_bitmap_layer);
 }
 static void window_load(Window *window) {
-  eventInfo tempEvent; 
+  eventInfo tempEvent;  
   strcpy(tempEvent.eventName, "Learn Western Campus"); 
-  strcpy(tempEvent.progress, "Completed 2/20");
+  strcpy(tempEvent.progress, "Completed 2 / 20");
   strcpy(tempEvent.rank, "6th / 10");  
   
 //   if (persist_exists(CONTACT_KEY))
@@ -279,8 +284,8 @@ static void window_load(Window *window) {
   GRect bounds = layer_get_bounds(window_layer);
   eventName_layer = text_layer_create((GRect) { .origin = { 0, 20 }, .size = { bounds.size.w, 30 } });
   text_layer_set_font(eventName_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-//   text_layer_set_text(name_layer, "Name: Albert Tai");
   text_layer_set_text(eventName_layer, tempEvent.eventName);
+//   text_layer_set_text(eventName_layer, "Learn Western Campus");
   text_layer_set_text_alignment(eventName_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(eventName_layer, GTextOverflowModeWordWrap);
 

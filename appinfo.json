@@ -9,14 +9,14 @@
     "resources": {
         "media": [
             {
-                "file": "images/pebble-icon (1).png",
-                "menuIcon": true,
-                "name": "IMAGE_PEBBLEICON",
+                "file": "images/pebble-splash.png",
+                "name": "IMAGE_SPLASH",
                 "type": "png"
             },
             {
-                "file": "images/pebble-splash.png",
-                "name": "IMAGE_SPLASH",
+                "file": "images/pebble-icon (1).png",
+                "menuIcon": true,
+                "name": "IMAGE_PEBBLEICON",
                 "type": "png"
             }
         ]

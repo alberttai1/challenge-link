@@ -23,6 +23,9 @@ KEY { KEY_BUTTON,
 #define MAX_EVENT_NAME 60
 #define MAX_PROGRESS 7
 #define MAX_PLAYER_NAME 20
+#define MAX_RANK 20
+#define MAX_POINTS 20 
+  
 #define CONTACT_KEY 1
 
 // Create the windows that we need 
@@ -38,10 +41,6 @@ static TextLayer *eventName_layer;
 static TextLayer *rank_layer; 
 static TextLayer *progress_layer; 
 
-static TextLayer *name_layer;
-static TextLayer *email_layer;
-static TextLayer *phone_layer;
-
 static BitmapLayer *s_splash_bitmap_layer; 
 AppTimer *timer; 
 
@@ -56,10 +55,10 @@ static GBitmap *s_splash_bitmap;
 
 /*** Structure for storing events ****/ 
 typedef struct {
-  char eventName[MAX_NAME]; 
+  char eventName[MAX_EVENT_NAME]; 
   char playerName[MAX_PLAYER_NAME];	       
-  int rank;
-  int points;
+  char rank[MAX_RANK];
+  char points[MAX_POINTS];
   char progress_layer[MAX_PROGRESS]; 	  
 } eventInfo;
 
@@ -96,20 +95,20 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
       
       case KEY_PLAYER_NAME:
       strcpy(temp.playerName, t->value->cstring);
-      text_layer_set_text(name_layer, t->value->cstring); 
+      text_layer_set_text(playerName_layer, t->value->cstring); 
       break;
 
       case KEY_EVENT_NAME:
       strcpy(temp.eventName, t->value->cstring);
-      text_layer_set_text(email_layer, t->value->cstring); 
+      text_layer_set_text(eventName_layer, t->value->cstring); 
       break;
 
       case KEY_RANK:
-      temp.rank = t->value->uint; 
+      strcpy(temp.rank, t->value->cstring);
       break;
 
       case KEY_POINTS:
-      temp.points = t->value->uint; 
+      strcpy(temp.points, t->value->cstring);
       break;
 
       case KEY_PROGRESS:
@@ -123,10 +122,10 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
     t = dict_read_next(iterator);
   }
   persist_write_data(CONTACT_KEY, &temp, sizeof(temp));
-  printf("The name is %s\n", temp.name); 
-  printf("%d", persist_exists(CONTACT_KEY)); 
-  vibes_short_pulse(); 
-  text_layer_set_text(text_layer, "Contact Recieved.");
+//   printf("The name is %s\n", temp.playerName); 
+//   printf("%d", persist_exists(CONTACT_KEY)); 
+//   vibes_short_pulse(); 
+//   text_layer_set_text(text_layer, "Contact Recieved.");
 }
 
 /********************************* Buttons ************************************/
@@ -182,7 +181,7 @@ static void splash_window_load(Window *window){
   s_splash_bitmap_layer = bitmap_layer_create(GRect(5, 5, 130, 130));
   bitmap_layer_set_bitmap(s_splash_bitmap_layer, s_splash_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_splash_bitmap_layer));
-  s_text_loading_layer = text_layer_create(GRect(5, 120, window_bounds.size.w - 5, 30));
+  s_text_loading_layer = text_layer_create(GRect(5, 130, window_bounds.size.w - 5, 30));
   text_layer_set_font(s_text_loading_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   text_layer_set_text(s_text_loading_layer, "Linking To Challenges . . .");
   text_layer_set_text_alignment(s_text_loading_layer, GTextAlignmentCenter);
@@ -202,40 +201,40 @@ static void splash_window_unload(Window *window){
 
 static void window_load(Window *window) {
   eventInfo tempEvent; 
-  strcpy(tempPerson.playerName, ""); 
-  strcpy(tempPerson.eventName, ""); 
-  strcpy(tempPerson.rank, ""); 
+  strcpy(tempEvent.playerName, ""); 
+  strcpy(tempEvent.eventName, ""); 
+  strcpy(tempEvent.rank, "");  
   
-  if (persist_exists(CONTACT_KEY))
-  {
-    printf("Time to read some previous data"); 
-    persist_read_data(CONTACT_KEY, &tempPerson, sizeof(tempPerson));
-    text_layer_set_text(name_layer, tempPerson.playerName); 
-    text_layer_set_text(email_layer, tempPerson.eventName); 
-    text_layer_set_text(phone_layer, tempPerson.rank); 
-  }
+//   if (persist_exists(CONTACT_KEY))
+//   {
+//     printf("Time to read some previous data"); 
+//     persist_read_data(CONTACT_KEY, &tempEvent, sizeof(tempEvent));
+//     text_layer_set_text(name_layer, tempEvent.playerName); 
+//     text_layer_set_text(email_layer, tempEvent.eventName); 
+//     text_layer_set_text(phone_layer, tempEvent.rank); 
+//   }
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
-  name_layer = text_layer_create((GRect) { .origin = { 0, 20 }, .size = { bounds.size.w, 30 } });
-  text_layer_set_font(name_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  playerName_layer = text_layer_create((GRect) { .origin = { 0, 20 }, .size = { bounds.size.w, 30 } });
+  text_layer_set_font(playerName_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 //   text_layer_set_text(name_layer, "Name: Albert Tai");
-  text_layer_set_text(name_layer, tempPerson.playerName);
-  text_layer_set_text_alignment(name_layer, GTextAlignmentCenter);
-  text_layer_set_overflow_mode(name_layer, GTextOverflowModeWordWrap);
+  text_layer_set_text(playerName_layer, tempEvent.playerName);
+  text_layer_set_text_alignment(playerName_layer, GTextAlignmentCenter);
+  text_layer_set_overflow_mode(playerName_layer, GTextOverflowModeWordWrap);
 
-  email_layer = text_layer_create((GRect) { .origin = { 0, 50 }, .size = { bounds.size.w, 20 } });
-  text_layer_set_font(email_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  eventName_layer = text_layer_create((GRect) { .origin = { 0, 50 }, .size = { bounds.size.w, 20 } });
+  text_layer_set_font(eventName_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
 //   text_layer_set_text(email_layer, "Email: al@alberttai.com");
-  text_layer_set_text(email_layer, tempPerson.eventName);
-  text_layer_set_text_alignment(email_layer, GTextAlignmentCenter);
-  text_layer_set_overflow_mode(email_layer, GTextOverflowModeWordWrap);
+  text_layer_set_text(eventName_layer, tempEvent.eventName);
+  text_layer_set_text_alignment(eventName_layer, GTextAlignmentCenter);
+  text_layer_set_overflow_mode(eventName_layer, GTextOverflowModeWordWrap);
 
-  phone_layer = text_layer_create((GRect) { .origin = { 0, 70 }, .size = { bounds.size.w, 20 } });
-  text_layer_set_font(phone_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  rank_layer = text_layer_create((GRect) { .origin = { 0, 70 }, .size = { bounds.size.w, 20 } });
+  text_layer_set_font(rank_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
 //   text_layer_set_text(phone_layer, "Phone: 226-239-5218");
-  text_layer_set_text(phone_layer, tempPerson.rank);
-  text_layer_set_text_alignment(phone_layer, GTextAlignmentCenter);
-  text_layer_set_overflow_mode(phone_layer, GTextOverflowModeWordWrap);
+  text_layer_set_text(rank_layer, tempEvent.rank);
+  text_layer_set_text_alignment(rank_layer, GTextAlignmentCenter);
+  text_layer_set_overflow_mode(rank_layer, GTextOverflowModeWordWrap);
   
   text_layer = text_layer_create((GRect) { .origin = { 0, 90 }, .size = { bounds.size.w, 50 } });
   text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
@@ -243,13 +242,16 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(text_layer, GTextOverflowModeWordWrap);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
-  layer_add_child(window_layer, text_layer_get_layer(name_layer));
-  layer_add_child(window_layer, text_layer_get_layer(email_layer));
-  layer_add_child(window_layer, text_layer_get_layer(phone_layer));
+  layer_add_child(window_layer, text_layer_get_layer(playerName_layer));
+  layer_add_child(window_layer, text_layer_get_layer(eventName_layer));
+  layer_add_child(window_layer, text_layer_get_layer(rank_layer));
 }
 
 static void window_unload(Window *window) {
   text_layer_destroy(text_layer);
+  text_layer_destroy(playerName_layer); 
+  text_layer_destroy(eventName_layer); 
+  text_layer_destroy(rank_layer); 
 }
 
 static void init(void) {

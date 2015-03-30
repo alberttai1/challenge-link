@@ -95,6 +95,8 @@ typedef struct {
 eventInfo temp; 
 
 /***** Handling App Messages *****/
+void timer_vibrate(void *data);
+
 
 // For sending functions
 static void send(int key, int message)
@@ -120,8 +122,14 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
     {
       case KEY_VIBRATE:
       // Trigger vibration 
-      text_layer_set_text(clue_layer, "Vibrate Activated"); 
-      vibes_short_pulse();
+      text_layer_set_text(clue_layer, "You Are Getting Closer."); 
+      vibes_short_pulse(); 
+      app_timer_register(300, (AppTimerCallback) timer_vibrate, NULL);
+//       vibes_short_pulse();
+      app_timer_register(300, (AppTimerCallback) timer_vibrate, NULL);
+//       vibes_short_pulse();
+      app_timer_register(300, (AppTimerCallback) timer_vibrate, NULL);
+//       vibes_short_pulse();
       break;
       
       case KEY_PLAYER_NAME:
@@ -217,6 +225,9 @@ static void outbox_failed_handler(DictionaryIterator *iterator, AppMessageResult
 static void outbox_sent_handler(DictionaryIterator *iterator, void *context)
 {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!"); 
+}
+void timer_vibrate(void *data) {
+ vibes_short_pulse(); 
 }
 void timer_callback(void *data) {
   window_stack_pop(true);
@@ -380,10 +391,11 @@ static void window_load(Window *window) {
 }
 
 static void window_unload(Window *window) {
-  text_layer_destroy(text_layer);
-  text_layer_destroy(playerName_layer); 
   text_layer_destroy(progress_layer); 
+  text_layer_destroy(eventName_layer); 
   text_layer_destroy(rank_layer); 
+  text_layer_destroy(points_layer); 
+  text_layer_destroy(clue_layer); 
 }
 
 static void init(void) {

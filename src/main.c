@@ -108,7 +108,11 @@ static void send(int key, int message)
 
   app_message_outbox_send(); 
 }
-
+/**
+ * This is for receieving messages in the Pebble 
+ * @param iterator [description]
+ * @param context  [description]
+ */
 static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
 {
   // Get the first pair 
@@ -189,12 +193,21 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
 
 /********************************* Buttons ************************************/
 
+/**
+ * This is for catching the select button
+ * @param recognizer [description]
+ * @param context    [description]
+ */
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   text_layer_set_text(clue_layer, "o.o");
 
   send(KEY_BUTTON, BUTTON_SELECT);
 }
-
+/**
+ * This handles the up click on the pebble 
+ * @param recognizer [description]
+ * @param context    [description]
+ */
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   text_layer_set_text(clue_layer, "Up");
 
@@ -317,8 +330,8 @@ static void requireChallenge_load(Window *window){
   bitmap_layer_set_bitmap(challenge_bitmap_layer, challenge_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(challenge_bitmap_layer));
   warning_msg_layer = text_layer_create(GRect(5, 120, window_bounds.size.w - 5, 30));
-  text_layer_set_font(warning_msg_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-  text_layer_set_text(warning_msg_layer, "Join A Room.");
+  text_layer_set_font(warning_msg_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_text(warning_msg_layer, "Join A Challenge.");
   text_layer_set_text_alignment(warning_msg_layer, GTextAlignmentCenter);
   text_layer_set_overflow_mode(warning_msg_layer, GTextOverflowModeWordWrap);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(warning_msg_layer));  
@@ -448,6 +461,7 @@ static void init(void) {
 
 // Deinitalizing the windows 
 static void deinit(void) {
+  window_destroy(requireChallengeWindow);
   window_destroy(locationCompletedWindow); 
   window_destroy(challengeAcceptedWindow); 
   window_destroy(window);

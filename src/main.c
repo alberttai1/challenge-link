@@ -94,7 +94,20 @@ eventInfo temp;
 /***** Handling App Messages *****/
 void timer_vibrate(void *data);
 
-
+void hint_vibrate(int segmentTime, int count)
+{
+  int j; 
+  uint32_t segments[100]; 
+  for (j = 0; j < count; j ++)
+  {
+    segments[j] = segmentTime; 
+  }
+  VibePattern pat = {
+  .durations = segments,
+  .num_segments = count,
+  };
+  vibes_enqueue_custom_pattern(pat);    
+}
 // For sending functions
 static void send(int key, int message)
 {
@@ -124,13 +137,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context)
       case KEY_VIBRATE:
       // Trigger vibration 
       text_layer_set_text(clue_layer, "You Are Getting Closer."); 
-      vibes_short_pulse(); 
-      app_timer_register(300, (AppTimerCallback) timer_vibrate, NULL);
-//       vibes_short_pulse();
-      app_timer_register(300, (AppTimerCallback) timer_vibrate, NULL);
-//       vibes_short_pulse();
-      app_timer_register(300, (AppTimerCallback) timer_vibrate, NULL);
-//       vibes_short_pulse();
+      hint_vibrate(500, 20); 
       break;
       
       case KEY_PLAYER_NAME:
@@ -236,9 +243,23 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context)
 {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!"); 
 }
-void timer_vibrate(void *data) {
- vibes_short_pulse(); 
+void timer_vibrate(void *data)
+  {
+  return; 
 }
+// void timer_vibrate(void *data) {
+// //   while(1)
+// //   {
+//     // Vibe pattern: ON for 200ms, OFF for 100ms, ON for 400ms:
+//   static const uint32_t segments[] = { 2000, 1000, 4000 };
+//   VibePattern pat = {
+//     .durations = segments,
+//     .num_segments = ARRAY_LENGTH(segments),
+//   };
+//   vibes_enqueue_custom_pattern(pat);
+// //   }
+// //  vibes_short_pulse(); 
+// }
 void timer_callback(void *data) {
   window_stack_pop(true);
 }

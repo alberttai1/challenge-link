@@ -40,9 +40,6 @@ static Window *requireChallengeWindow;
 static Window *challengeAcceptedWindow; 
 static Window *locationCompletedWindow; 
 
-// Create the text layers that we need 
-static TextLayer *text_layer;
-
 // Create the text layers need for events
 static TextLayer *playerName_layer; 
 static TextLayer *eventName_layer; 
@@ -346,10 +343,10 @@ static void requireChallenge_unload(Window *window){
   bitmap_layer_destroy(challenge_bitmap_layer);
 }
 static void window_load(Window *window) {
-  eventInfo tempEvent;  
-  strcpy(tempEvent.eventName, "Learn Western Campus"); 
-  strcpy(tempEvent.progress, "Completed 2 / 20");
-  strcpy(tempEvent.rank, "6th / 10");  
+//   eventInfo tempEvent;  
+//   strcpy(tempEvent.eventName, "Learn Western Campus"); 
+//   strcpy(tempEvent.progress, "Completed 2 / 20");
+//   strcpy(tempEvent.rank, "6th / 10");  
   
 //   if (persist_exists(CONTACT_KEY))
 //   {
@@ -472,7 +469,7 @@ static void deinit(void) {
 int main(void) {
   init();
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window: %p", window);
+//   APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window: %p", window);
 
   app_event_loop();
   deinit();

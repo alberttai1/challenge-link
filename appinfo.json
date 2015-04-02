@@ -9,18 +9,9 @@
     "resources": {
         "media": [
             {
-                "file": "images/13804.png",
-                "name": "IMAGE_CONGRATS",
-                "type": "png"
-            },
-            {
-                "file": "images/position5.png",
-                "name": "IMAGE_CHALLENGEJOINED",
-                "type": "png"
-            },
-            {
-                "file": "images/warning42.png",
-                "name": "IMAGE_WARNING",
+                "file": "images/pebble-icon (1).png",
+                "menuIcon": true,
+                "name": "IMAGE_PEBBLEICON",
                 "type": "png"
             },
             {
@@ -29,9 +20,18 @@
                 "type": "png"
             },
             {
-                "file": "images/pebble-icon (1).png",
-                "menuIcon": true,
-                "name": "IMAGE_PEBBLEICON",
+                "file": "images/warning42.png",
+                "name": "IMAGE_WARNING",
+                "type": "png"
+            },
+            {
+                "file": "images/position5.png",
+                "name": "IMAGE_CHALLENGEJOINED",
+                "type": "png"
+            },
+            {
+                "file": "images/13804.png",
+                "name": "IMAGE_CONGRATS",
                 "type": "png"
             }
         ]
